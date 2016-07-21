@@ -80,14 +80,13 @@ const notify = (ids,sobjs,compactLayout,defaultLayout) => {
   }
 };
 
-const notifySync = (sobjs,compactLayout,defaultLayout) => {
+const notifySync = (sobjs,ctx) => {
   if(subscribers && subscribers.length){
     subscribers.forEach((subscriber)=>{
       if(subscriber && subscriber.props && subscriber.props.id){
         const sobj = sobjs[subscriber.shortId];
-        console.log('=== sobj: ',sobj);
         if(sobj && sobj.attributes && sobj.attributes.type){
-          subscriber.updateSobj(sobj,compactLayout,defaultLayout);
+          subscriber.updateSyncedSobj(sobj,ctx);
         }
       }
     });
@@ -143,7 +142,6 @@ module.exports = React.createClass ({
     unsubscribe(this);
   },
   handleRefresh(){
-    console.log('>>> REFRESH !!!');
     this.getInfo(true);
   },
   updateSobj(sobj,compactLayout,defaultLayout){
@@ -152,6 +150,20 @@ module.exports = React.createClass ({
       loading:false,
       compactLayout:compactLayout,
       defaultLayout:defaultLayout,
+      refreshedDate: new Date()
+    });
+  },
+  updateSyncedSobj(sobj,ctx){
+    if(sobj && sobj.attributes){
+      sobj.attributes.compactTitle = utils.getCompactTitle(sobj, ctx.compactTitleFieldNames);
+      sobj.attributes.compactSummary = utils.getCompactSummary(sobj, ctx.compactTitleFieldNames, ctx.compactLayoutFieldNames);
+      sobj.attributes.shortId = utils.getShortId(sobj);
+    }
+    this.setState({
+      sobj:sobj,
+      loading:false,
+      compactLayout:ctx.compactLayout,
+      defaultLayout:ctx.defaultLayout,
       refreshedDate: new Date()
     });
   },
