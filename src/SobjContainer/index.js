@@ -36,7 +36,9 @@ import findIndex from 'lodash.findindex';
 
 import {
   query,
-  getByTypeAndId
+  getByTypeAndId,
+  smartSyncStore,
+  utils
 } from 'react.force.data';
 
 const subscribers = [];
@@ -50,6 +52,13 @@ const unsubscribe = (comp) => {
   if(i != -1) {
     subscribers.splice(i, 1);
   }
+};
+
+const getShortId = (id) => {
+  if(id && id.length>15){
+    return id.substring(0,15);
+  }
+  return id;
 };
 
 const notify = (ids,sobjs,compactLayout,defaultLayout) => {
@@ -71,9 +80,26 @@ const notify = (ids,sobjs,compactLayout,defaultLayout) => {
   }
 };
 
+const notifySync = (sobjs,compactLayout,defaultLayout) => {
+  if(subscribers && subscribers.length){
+    subscribers.forEach((subscriber)=>{
+      if(subscriber && subscriber.props && subscriber.props.id){
+        const sobj = sobjs[subscriber.shortId];
+        console.log('=== sobj: ',sobj);
+        if(sobj && sobj.attributes && sobj.attributes.type){
+          subscriber.updateSobj(sobj,compactLayout,defaultLayout);
+        }
+      }
+    });
+  }
+};
+
 query.addListener(notify);
 
+smartSyncStore.addListener(notifySync);
+
 module.exports = React.createClass ({
+  shortId:null,
   getDefaultProps(){
     return {
       type:null,
@@ -109,6 +135,7 @@ module.exports = React.createClass ({
     };
   },
   componentDidMount(){
+    this.shortId = getShortId(this.props.id);
     this.getInfo();
     subscribe(this);
   },
