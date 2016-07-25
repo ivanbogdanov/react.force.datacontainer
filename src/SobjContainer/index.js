@@ -111,7 +111,7 @@ const notifyMetaContext = (ctx) => {
 };
 
 //query.addListener(notify);
-metaContext.addListener(notifyMetaContext);
+//metaContext.addListener(notifyMetaContext);
 
 smartSyncStore.addListener(notifySync);
 
@@ -239,15 +239,14 @@ module.exports = React.createClass ({
     }
     getByTypeAndId(this.props.type,this.props.id,nocache)
     .then((opts)=>{
-
         const sobj = (opts.sobj && opts.sobj.attributes)?opts.sobj:opts.cachedSobj
         if(sobj){
           this.setState({
             sobj:sobj,
             ctx:opts,
 //            compactTitle: opts.cachedSobj.attributes.compactTitle,
-            compactLayout:opts.cachedCompactLayout,
-            defaultLayout:opts.cachedDefaultLayout,
+            compactLayout:opts.compactLayout,
+            defaultLayout:opts.defaultLayout,
 //            refreshedDate: new Date()
           });
           this.extendSobj();
