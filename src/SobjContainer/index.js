@@ -179,9 +179,9 @@ module.exports = React.createClass ({
       const ctx = this.state.ctx;
 
       if(sobj && sobj.attributes){
-        const compactTitle = utils.getCompactTitle(sobj, ctx.compactTitleFieldNames);
+        const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
 
-        const compactSummary = utils.getCompactSummary(sobj, ctx.compactTitleFieldNames, ctx.compactLayoutFieldNames);
+        const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
 
         this.setState({
           loading:false,
@@ -207,8 +207,6 @@ module.exports = React.createClass ({
     });
   },
   updateSyncedSobj(sobj,ctx){
-    console.log(' *** updateSyncedSobj');
-    console.log(sobj,ctx);
     this.setState({
       sobj:sobj,
       ctx:ctx,
