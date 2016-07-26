@@ -35,11 +35,12 @@ import shallowEqual from 'shallowequal';
 import findIndex from 'lodash.findindex';
 
 import {
-  query,
   getByTypeAndId,
   smartSyncStore,
   utils,
-  metaContext
+  metaContext,
+  getMetadataByType,
+  requestWithTypeAndId
 } from 'react.force.data';
 
 const subscribers = [];
@@ -82,6 +83,8 @@ const notify = (ids,sobjs,compactLayout,defaultLayout) => {
 };
 
 const notifySync = (sobjs,ctx) => {
+  console.log('=n=o=t=i=f=y=S=y=n=c=: ',sobjs);
+  console.log('=c=t=x=: ',ctx);
   if(subscribers && subscribers.length){
     subscribers.forEach((subscriber)=>{
       if(subscriber && subscriber.props && subscriber.props.id){
@@ -109,9 +112,6 @@ const notifyMetaContext = (ctx) => {
   }
 
 };
-
-//query.addListener(notify);
-//metaContext.addListener(notifyMetaContext);
 
 smartSyncStore.addListener(notifySync);
 
@@ -163,14 +163,19 @@ module.exports = React.createClass ({
   },
   componentDidMount(){
     this.shortId = getShortId(this.props.id);
-    this.getInfo();
+//    this.getInfo();
+    this.getData();
     subscribe(this);
   },
   componentWillUnmount(){
     unsubscribe(this);
   },
   handleRefresh(){
-    this.getInfo(true);
+//    this.getData(true);
+    //requestWithTypeAndId(this.props.type, this.props.id);
+    requestWithTypeAndId(this.props.type, this.props.id);
+
+    this.setState({loading:true});
   },
   extendSobj(){
     if(this.state.ctx && this.state.ctx.type && this.state.sobj){
@@ -184,34 +189,22 @@ module.exports = React.createClass ({
         const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
 
         this.setState({
-          loading:false,
           refreshedDate: new Date(),
           sobjext: {
             compactTitle: compactTitle,
             compactSummary: compactSummary
           }
         });
-
       }
-
-
     }
-  },
-  updateSobj(sobj,compactLayout,defaultLayout){
-    this.setState({
-      sobj:sobj,
-      loading:false,
-      compactLayout:compactLayout,
-      defaultLayout:defaultLayout,
-      refreshedDate: new Date()
-    });
   },
   updateSyncedSobj(sobj,ctx){
     this.setState({
-      sobj:sobj,
+      sobj:sobj?sobj:this.state.sobj,
       ctx:ctx,
-      compactLayout:ctx.compactLayout,
-      defaultLayout:ctx.defaultLayout,
+      compactLayout:ctx?ctx.compactLayout:null,
+      defaultLayout:ctx?ctx.defaultLayout:null,
+      loading:sobj?false:this.state.loading
     });
     this.extendSobj();
   },
@@ -232,6 +225,25 @@ module.exports = React.createClass ({
       });
     }
   },
+
+  getData(nocache) {
+    this.setState({loading:true});
+    if(!this.props.type || !this.props.id){
+      return;
+    }
+
+    smartSyncStore.getByTypeAndId(this.props.type,this.props.id,nocache,(sobj)=>{
+      if(sobj){
+        this.updateSyncedSobj(sobj,null);
+      }
+    });
+
+    getMetadataByType({type:this.props.type})
+    .then((ctx)=>{
+      this.updateSyncedSobj(null,ctx);
+    });
+  },
+
   getInfo(nocache) {
     this.setState({loading:true});
     if(!this.props.type || !this.props.id){
@@ -240,6 +252,8 @@ module.exports = React.createClass ({
     getByTypeAndId(this.props.type,this.props.id,nocache)
     .then((opts)=>{
         const sobj = (opts.sobj && opts.sobj.attributes)?opts.sobj:opts.cachedSobj
+
+        console.log('~~~ !!! THEN: ~~~ OPTS: ',opts);
         if(sobj){
           this.setState({
             sobj:sobj,
@@ -264,7 +278,8 @@ module.exports = React.createClass ({
   },
   componentWillReceiveProps(newProps){
     if(this.props.refreshDate !== newProps.refreshDate){
-      this.getInfo();
+//      this.getInfo();
+      this.getData();
     }
   },
 
