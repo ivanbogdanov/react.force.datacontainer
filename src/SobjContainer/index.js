@@ -107,7 +107,7 @@ module.exports = React.createClass ({
   },
   childContextTypes: {
     sobj: React.PropTypes.object,
-    sobjxt: React.PropTypes.object,
+    sobjExt: React.PropTypes.object,
     compactLayout: React.PropTypes.object,
     defaultLayout: React.PropTypes.object,
     doRefresh: React.PropTypes.func,
@@ -118,7 +118,7 @@ module.exports = React.createClass ({
   getInitialState(){
     return {
       sobj:this.props.sobj?this.props.sobj:{Name:' ',attributes:{}},
-      sobjext:{compactTitle:'',compactSummary:[]},
+      sobjExt:{compactTitle:'',compactSummary:[]},
       ctx:{},
       compactLayout:{},
       defaultLayout:{},
@@ -131,7 +131,7 @@ module.exports = React.createClass ({
   getChildContext() {
     return {
       sobj: this.state.sobj,
-      sobjxt: this.state.sobjext,
+      sobjExt: this.state.sobjExt,
       compactLayout:this.state.compactLayout,
       defaultLayout:this.state.defaultLayout,
       doRefresh:this.handleRefresh,
@@ -141,10 +141,10 @@ module.exports = React.createClass ({
     };
   },
   componentDidMount(){
-    this.shortId = getShortId(this.props.id);
-//    this.getInfo();
-    this.getData();
     subscribe(this);
+
+    this.shortId = getShortId(this.props.id);
+    this.getData(false);
   },
   componentWillUnmount(){
     unsubscribe(this);
@@ -169,7 +169,7 @@ module.exports = React.createClass ({
 
         this.setState({
           refreshedDate: new Date(),
-          sobjext: {
+          sobjExt: {
             compactTitle: compactTitle,
             compactSummary: compactSummary
           }
@@ -177,24 +177,37 @@ module.exports = React.createClass ({
       }
     }
   },
+
+  getSobjExt(sobj,ctx){
+    console.log('==g=e=t=S=o=b=j=E=x=t==');
+    if(ctx && sobj.Id){
+      if(sobj && ctx.compactLayout){
+        const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
+        const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
+        return {
+          compactTitle: compactTitle,
+          compactSummary: compactSummary
+        };
+      }
+    }
+    return;
+  },
+
   updateSyncedSobj(sobj,ctx){
+    console.log('==u=p=d=a=t=e=S=y=n=c=e=d=S=o=b=j== :',sobj,ctx);
+    const sobjExt = this.getSobjExt(sobj,ctx);
     this.setState({
       sobj:sobj?sobj:this.state.sobj,
-      ctx:ctx,
-      compactLayout:ctx?ctx.compactLayout:null,
-      defaultLayout:ctx?ctx.defaultLayout:null,
-      loading:sobj?false:this.state.loading
-    });
-    this.extendSobj();
-  },
-  updateMetaContext(ctx){
-    this.setState({
-      ctx:ctx,
-      compactLayout:ctx.compactLayout,
-      defaultLayout:ctx.defaultLayout,
+      sobjExt:sobjExt?sobjExt:this.state.sobjExt,
+      ctx:ctx?ctx:this.state.ctx,
+      compactLayout:ctx?ctx.compactLayout:this.state.compactLayout,
+      defaultLayout:ctx?ctx.defaultLayout:this.state.defaultLayout,
+      loading:sobj?false:this.state.loading,
       refreshedDate: new Date()
     });
-    this.extendSobj();
+  },
+  updateMetaContext(ctx){
+    updateSyncedSobj(null,ctx);
   },
   handleDataLoad(){
     if(this.props.onData){
@@ -211,41 +224,16 @@ module.exports = React.createClass ({
       return;
     }
 
-    smartSyncStore.getByTypeAndId(this.props.type,this.props.id,nocache,(sobj)=>{
-      if(sobj){
-        this.updateSyncedSobj(sobj,null);
-      }
-    });
 
     getMetadataByType({type:this.props.type})
     .then((ctx)=>{
-      this.updateSyncedSobj(null,ctx);
-    });
-  },
-
-  getInfo(nocache) {
-    this.setState({loading:true});
-    if(!this.props.type || !this.props.id){
-      return;
-    }
-    getByTypeAndId(this.props.type,this.props.id,nocache)
-    .then((opts)=>{
-        const sobj = (opts.sobj && opts.sobj.attributes)?opts.sobj:opts.cachedSobj
-
-        console.log('~~~ !!! THEN: ~~~ OPTS: ',opts);
+      smartSyncStore.getByTypeAndId(this.props.type,this.props.id,nocache,(sobj)=>{
         if(sobj){
-          this.setState({
-            sobj:sobj,
-            ctx:opts,
-//            compactTitle: opts.cachedSobj.attributes.compactTitle,
-            compactLayout:opts.compactLayout,
-            defaultLayout:opts.defaultLayout,
-//            refreshedDate: new Date()
-          });
-          this.extendSobj();
+          this.updateSyncedSobj(sobj,ctx);
         }
-
       });
+
+    });
   },
 
   render() {
