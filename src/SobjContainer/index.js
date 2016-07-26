@@ -63,28 +63,7 @@ const getShortId = (id) => {
   return id;
 };
 
-const notify = (ids,sobjs,compactLayout,defaultLayout) => {
-  if(subscribers && subscribers.length){
-    subscribers.forEach((subscriber)=>{
-      if(subscriber && subscriber.props && subscriber.props.id){
-        const searchId = subscriber.props.id;
-        const index = findIndex(ids, (id) => { 
-          return id.indexOf(searchId)>-1;
-        });
-        if(index>-1){
-          const sobj = sobjs[index];
-          if(sobj && sobj.attributes && sobj.attributes.type){
-            subscriber.updateSobj(sobj,compactLayout,defaultLayout);
-          }
-        }
-      }
-    });
-  }
-};
-
 const notifySync = (sobjs,ctx) => {
-  console.log('=n=o=t=i=f=y=S=y=n=c=: ',sobjs);
-  console.log('=c=t=x=: ',ctx);
   if(subscribers && subscribers.length){
     subscribers.forEach((subscriber)=>{
       if(subscriber && subscriber.props && subscriber.props.id){
