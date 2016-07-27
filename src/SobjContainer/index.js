@@ -179,7 +179,6 @@ module.exports = React.createClass ({
   },
 
   getSobjExt(sobj,ctx){
-    console.log('==g=e=t=S=o=b=j=E=x=t==');
     if(ctx && sobj.Id){
       if(sobj && ctx.compactLayout){
         const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
@@ -194,7 +193,6 @@ module.exports = React.createClass ({
   },
 
   updateSyncedSobj(sobj,ctx){
-    console.log('==u=p=d=a=t=e=S=y=n=c=e=d=S=o=b=j== :',sobj,ctx);
     const sobjExt = this.getSobjExt(sobj,ctx);
     this.setState({
       sobj:sobj?sobj:this.state.sobj,
