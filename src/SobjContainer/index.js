@@ -232,6 +232,7 @@ module.exports = React.createClass ({
       });
 
     });
+
   },
 
   render() {
@@ -249,8 +250,10 @@ module.exports = React.createClass ({
   },
 
   shouldComponentUpdate(nextProps, nextState){
-
     if(!this.props.update){
+      return false;
+    }
+    if(this.state.sobj.LastModifiedDate === nextState.sobj.LastModifiedDate){
       return false;
     }
     if(this.props.type !== nextProps.type){
@@ -259,9 +262,11 @@ module.exports = React.createClass ({
     if(this.state.refreshedDate !== nextState.refreshedDate){
       return true;
     }
+/*
     if(!shallowEqual(this.state.sobj, nextState.sobj)){
       return true;
     }
+*/
     return false;
 
   }
