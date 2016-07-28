@@ -92,12 +92,6 @@ const notifyMetaContext = (ctx) => {
 
 };
 
-const getSummary = (sobj, compactSummaryCfg) => {
-  console.log('==g=e=t=S=u=m=m=a=r=y=');
-  console.log(compactSummaryCfg);
-  console.log('==g=e=t=S=u=m=m=a=r=y=');
-};
-
 smartSyncStore.addListener(notifySync);
 
 module.exports = React.createClass ({
@@ -163,6 +157,7 @@ module.exports = React.createClass ({
 
     this.setState({loading:true});
   },
+/*
   extendSobj(){
     if(this.state.ctx && this.state.ctx.type && this.state.sobj){
 
@@ -174,9 +169,6 @@ module.exports = React.createClass ({
 
         const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
 
-        const summary = getSummary(sobj, ctx.compactLayout._extra.compactSummaryCfg);
-
-
         this.setState({
           refreshedDate: new Date(),
           sobjExt: {
@@ -187,11 +179,9 @@ module.exports = React.createClass ({
       }
     }
   },
-
+*/
   getSobjExt(sobj,ctx){
     if(ctx && sobj.Id){
-      const summary = getSummary(sobj, ctx.compactLayout._extra.compactSummaryCfg);
-
       if(sobj && ctx.compactLayout){
         const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
         const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);

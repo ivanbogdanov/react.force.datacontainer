@@ -65,15 +65,10 @@ module.exports = React.createClass ({
     return this.state.dataSource.cloneWithRows(items);
   },
   getData() {
-    console.log('==g=e=t=D=a=t=a==');
     this.setState({loading:true});
 //    relevantItemsWithType(this.props.type,(err, items)=>{
     allWithType(this.props.type,(err, items)=>{
-      console.log('@@@ CALLBACK');
       if(!err){
-        console.log('=============');
-        console.log(items);
-        console.log('=============');
         this.setState({
           dataSource: this.getDataSource(items),
           loading:false
