@@ -92,6 +92,12 @@ const notifyMetaContext = (ctx) => {
 
 };
 
+const getSummary = (sobj, compactSummaryCfg) => {
+  console.log('==g=e=t=S=u=m=m=a=r=y=');
+  console.log(compactSummaryCfg);
+  console.log('==g=e=t=S=u=m=m=a=r=y=');
+};
+
 smartSyncStore.addListener(notifySync);
 
 module.exports = React.createClass ({
@@ -102,7 +108,8 @@ module.exports = React.createClass ({
       id:null,
       refreshDate:new Date(),
       update:true,
-      style:{}
+      style:{},
+      wrapper:View
     };
   },
   childContextTypes: {
@@ -167,6 +174,9 @@ module.exports = React.createClass ({
 
         const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
 
+        const summary = getSummary(sobj, ctx.compactLayout._extra.compactSummaryCfg);
+
+
         this.setState({
           refreshedDate: new Date(),
           sobjExt: {
@@ -180,6 +190,8 @@ module.exports = React.createClass ({
 
   getSobjExt(sobj,ctx){
     if(ctx && sobj.Id){
+      const summary = getSummary(sobj, ctx.compactLayout._extra.compactSummaryCfg);
+
       if(sobj && ctx.compactLayout){
         const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
         const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
@@ -205,7 +217,7 @@ module.exports = React.createClass ({
     });
   },
   updateMetaContext(ctx){
-    updateSyncedSobj(null,ctx);
+//    updateSyncedSobj(null,ctx);
   },
   handleDataLoad(){
     if(this.props.onData){
@@ -237,9 +249,9 @@ module.exports = React.createClass ({
 
   render() {
     return (
-      <View style={this.props.style}>
+      <this.props.wrapper style={this.props.style}>
         {this.state.loading?<View></View>:this.props.children}
-      </View>
+      </this.props.wrapper>
     )
   },
   componentWillReceiveProps(newProps){
@@ -253,20 +265,27 @@ module.exports = React.createClass ({
     if(!this.props.update){
       return false;
     }
-    if(this.state.sobj.LastModifiedDate === nextState.sobj.LastModifiedDate){
-      return false;
-    }
+
+//    if(this.state.loading !== nextState.loading){
+//      return true;
+//    }
+
     if(this.props.type !== nextProps.type){
       return true;
     }
+
     if(this.state.refreshedDate !== nextState.refreshedDate){
       return true;
     }
-/*
+
+    if(this.state.sobj.LastModifiedDate === nextState.sobj.LastModifiedDate){
+      return false;
+    }
+
     if(!shallowEqual(this.state.sobj, nextState.sobj)){
       return true;
     }
-*/
+
     return false;
 
   }

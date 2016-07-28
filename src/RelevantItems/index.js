@@ -33,7 +33,7 @@ import React, {
 
 import {forceClient} from 'react.force';
 
-import {requestWithTypeAndId, ListQuery} from 'react.force.data';
+import {requestWithTypeAndId, relevantItemsWithType, allWithType} from 'react.force.data';
 
 module.exports = React.createClass ({
   getDefaultProps(){
@@ -67,7 +67,8 @@ module.exports = React.createClass ({
   getData() {
     console.log('==g=e=t=D=a=t=a==');
     this.setState({loading:true});
-    ListQuery.relevantItemsWithType(this.props.type,(err, items)=>{
+//    relevantItemsWithType(this.props.type,(err, items)=>{
+    allWithType(this.props.type,(err, items)=>{
       console.log('@@@ CALLBACK');
       if(!err){
         console.log('=============');
