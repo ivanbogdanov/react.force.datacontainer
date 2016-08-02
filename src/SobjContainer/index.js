@@ -111,6 +111,8 @@ module.exports = React.createClass ({
     sobjExt: React.PropTypes.object,
     compactLayout: React.PropTypes.object,
     defaultLayout: React.PropTypes.object,
+    theme: React.PropTypes.object,
+    describe: React.PropTypes.object,
     doRefresh: React.PropTypes.func,
     refreshedDate: React.PropTypes.instanceOf(Date),
     compactTitle: React.PropTypes.string,
@@ -123,6 +125,8 @@ module.exports = React.createClass ({
       ctx:{},
       compactLayout:{},
       defaultLayout:{},
+      theme:{},
+      describe:{},
       loading:false,
       refreshedDate: new Date(),
       compactTitle:'',
@@ -135,6 +139,8 @@ module.exports = React.createClass ({
       sobjExt: this.state.sobjExt,
       compactLayout:this.state.compactLayout,
       defaultLayout:this.state.defaultLayout,
+      theme:this.state.theme,
+      describe:this.state.describe,
       doRefresh:this.handleRefresh,
       refreshedDate: this.state.refreshedDate,
       compactTitle: this.state.compactTitle,
@@ -202,6 +208,8 @@ module.exports = React.createClass ({
       ctx:ctx?ctx:this.state.ctx,
       compactLayout:ctx?ctx.compactLayout:this.state.compactLayout,
       defaultLayout:ctx?ctx.defaultLayout:this.state.defaultLayout,
+      theme:ctx?ctx.theme:this.state.theme,
+      describe:ctx?ctx.describe:this.state.describe,
       loading:sobj?false:this.state.loading,
       refreshedDate: new Date()
     });
@@ -232,7 +240,6 @@ module.exports = React.createClass ({
           this.updateSyncedSobj(sobj,ctx);
         }
       });
-
     });
 
   },

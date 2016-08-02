@@ -28,7 +28,7 @@ import SobjContainer from './SobjContainer';
 import List from './List';
 import RelevantItems from './RelevantItems';
 import ScrollRefresh from './ScrollRefresh';
-import {utils} from 'react.force.data';
+import {utils, updateRelevants} from 'react.force.data';
 
 module.exports = {
   SobjContainer: SobjContainer,
@@ -37,5 +37,6 @@ module.exports = {
   List: List,
   RelevantItems: RelevantItems,
   ScrollRefresh: ScrollRefresh,
-  utils: utils
+  utils: utils,
+  refreshCached: updateRelevants
 };

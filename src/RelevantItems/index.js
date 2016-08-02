@@ -33,7 +33,7 @@ import React, {
 
 import {forceClient} from 'react.force';
 
-import {requestWithTypeAndId, relevantItemsWithType, allWithType} from 'react.force.data';
+import {requestWithTypeAndId, relevantItemsWithType, allWithType, doListQueryForTypeWhere} from 'react.force.data';
 
 module.exports = React.createClass ({
   getDefaultProps(){
@@ -67,7 +67,7 @@ module.exports = React.createClass ({
   getData() {
     this.setState({loading:true});
 //    relevantItemsWithType(this.props.type,(err, items)=>{
-    allWithType(this.props.type,(err, items)=>{
+    doListQueryForTypeWhere(this.props.type,null,(err, items)=>{
       if(!err){
         this.setState({
           dataSource: this.getDataSource(items),
