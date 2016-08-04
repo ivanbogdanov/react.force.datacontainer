@@ -33,12 +33,13 @@ import React, {
 
 import {forceClient} from 'react.force';
 
-import {requestWithTypeAndId, relevantItemsWithType, allWithType, doListQueryForTypeWhere} from 'react.force.data';
+import {requestWithTypeAndId, relevantItemsWithType, allWithType, doNamedListViewQueryForType} from 'react.force.data';
 
 module.exports = React.createClass ({
   getDefaultProps(){
     return {
       type:null,
+      name:'All',
       refreshDate:new Date(),
       style:{}
     };
@@ -66,46 +67,26 @@ module.exports = React.createClass ({
   },
   getData() {
     this.setState({loading:true});
-    relevantItemsWithType(this.props.type,(err, items)=>{
-
-//    doListQueryForTypeWhere(this.props.type,null,(err, items)=>{
-      if(!err){
-        this.setState({
-          dataSource: this.getDataSource(items),
-          loading:false
-        });
-      }
-    });
-
-/*
-    forceClient.relevantItems([this.props.type],
-      (response) => {
-        const type = this.props.type;
-        if(response && response.length){
-          const typeItems = response[0];
-          if(typeItems.recordIds && typeItems.recordIds.length){
-            const items = typeItems.recordIds.map((recordId)=>{
-              requestWithTypeAndId(type,recordId)
-              return {
-                Id:recordId,
-                attributes:{
-                  type:type
-                }
-              }
-            });
-            this.setState({
-              dataSource: this.getDataSource(items),
-              loading:false
-            });
-            return;
-          }
+    if(this.props.name === 'relevantItems'){
+      relevantItemsWithType(this.props.type,(err, items)=>{
+        if(!err){
+          this.setState({
+            dataSource: this.getDataSource(items),
+            loading:false
+          });
         }
-        this.setState({
-          dataSource: this.getDataSource([]),
-          loading:false
-        });
       });
-*/
+    }
+    else{
+      doNamedListViewQueryForType(this.props.type,this.props.name,(err, items)=>{
+        if(!err){
+          this.setState({
+            dataSource: this.getDataSource(items),
+            loading:false
+          });
+        }
+      });
+    }
   },
 
   render() {
@@ -116,7 +97,12 @@ module.exports = React.createClass ({
     )
   },
   componentWillReceiveProps(newProps){
-    if(this.props.refreshDate !== newProps.refreshDate){
+//    if(this.props.refreshDate !== newProps.refreshDate){
+//      this.getData();
+//    }
+  },
+  componentDidUpdate(newProps){
+    if(this.props.type !== newProps.type || this.props.name !== newProps.name){
       this.getData();
     }
   },

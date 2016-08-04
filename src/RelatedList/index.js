@@ -23,26 +23,31 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
-import SobjContainer from './SobjContainer';
-import List from './List';
-import RelevantItems from './RelevantItems';
-import ScrollRefresh from './ScrollRefresh';
-import RelatedList from './RelatedList';
-import NamedListView from './NamedListView';
-import ListViews from './ListViews';
-import {utils, updateRelevants} from 'react.force.data';
 
-module.exports = {
-  SobjContainer: SobjContainer,
-  Sobj: SobjContainer,
-  ListContainer: List,
-  List: List,
-  RelevantItems: RelevantItems,
-  NamedListView:NamedListView,
-  ScrollRefresh: ScrollRefresh,
-  RelatedList:RelatedList,
-  ListViews:ListViews,
-  utils: utils,
-  refreshCached: updateRelevants
-};
+'use strict';
+
+import React, {
+  Text,
+  View
+} from 'react-native';
+
+import {
+  getByTypeAndId,
+  smartSyncStore,
+  utils,
+  metaContext,
+  getMetadataByType,
+  requestWithTypeAndId
+} from 'react.force.data';
+
+
+module.exports = React.createClass ({
+  getDefaultProps(){
+    return {
+
+    };
+  },
+  render(){
+    <View>RELATED</View>
+  }
+});

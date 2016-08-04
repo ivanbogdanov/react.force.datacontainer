@@ -40,41 +40,10 @@ import {
   utils,
   metaContext,
   getMetadataByType,
+  getListViewsByType,
   requestWithTypeAndId
 } from 'react.force.data';
 
-const subscribers = [];
-
-const subscribe = (comp)=>{
-  subscribers.push(comp)
-};
-
-const unsubscribe = (comp) => {
-  const i = subscribers.indexOf(comp);
-  if(i != -1) {
-    subscribers.splice(i, 1);
-  }
-};
-
-const getShortId = (id) => {
-  if(id && id.length>15){
-    return id.substring(0,15);
-  }
-  return id;
-};
-
-const notifySync = (sobjs,ctx) => {
-  if(subscribers && subscribers.length){
-    subscribers.forEach((subscriber)=>{
-      if(subscriber && subscriber.props && subscriber.props.id){
-        const sobj = sobjs[subscriber.shortId];
-        if(sobj && sobj.attributes && sobj.attributes.type){
-          subscriber.updateSyncedSobj(sobj,ctx);
-        }
-      }
-    });
-  }
-};
 
 const notifyMetaContext = (ctx) => {
   return;
@@ -92,14 +61,12 @@ const notifyMetaContext = (ctx) => {
 
 };
 
-smartSyncStore.addListener(notifySync);
 
 module.exports = React.createClass ({
-  shortId:null,
+
   getDefaultProps(){
     return {
       type:null,
-      id:null,
       refreshDate:new Date(),
       update:true,
       style:{},
@@ -107,8 +74,6 @@ module.exports = React.createClass ({
     };
   },
   childContextTypes: {
-    sobj: React.PropTypes.object,
-    sobjExt: React.PropTypes.object,
     compactLayout: React.PropTypes.object,
     defaultLayout: React.PropTypes.object,
     theme: React.PropTypes.object,
@@ -116,13 +81,9 @@ module.exports = React.createClass ({
     listViews: React.PropTypes.object,
     doRefresh: React.PropTypes.func,
     refreshedDate: React.PropTypes.instanceOf(Date),
-    compactTitle: React.PropTypes.string,
-    compactSummary: React.PropTypes.array
   },
   getInitialState(){
     return {
-      sobj:this.props.sobj?this.props.sobj:{Name:' ',attributes:{}},
-      sobjExt:{compactTitle:'',compactSummary:[]},
       ctx:{},
       compactLayout:{},
       defaultLayout:{},
@@ -131,14 +92,10 @@ module.exports = React.createClass ({
       listViews:{},
       loading:false,
       refreshedDate: new Date(),
-      compactTitle:'',
-      compactSummary:[]
     };
   },
   getChildContext() {
     return {
-      sobj: this.state.sobj,
-      sobjExt: this.state.sobjExt,
       compactLayout:this.state.compactLayout,
       defaultLayout:this.state.defaultLayout,
       theme:this.state.theme,
@@ -146,104 +103,38 @@ module.exports = React.createClass ({
       listViews:this.state.listViews,
       doRefresh:this.handleRefresh,
       refreshedDate: this.state.refreshedDate,
-      compactTitle: this.state.compactTitle,
-      compactSummary: this.state.compactSummary
     };
   },
   componentDidMount(){
-    subscribe(this);
-
-    this.shortId = getShortId(this.props.id);
     this.getData(false);
   },
-  componentWillUnmount(){
-    unsubscribe(this);
-  },
-  handleRefresh(){
-//    this.getData(true);
-    //requestWithTypeAndId(this.props.type, this.props.id);
-    requestWithTypeAndId(this.props.type, this.props.id);
 
-    this.setState({loading:true});
-  },
-/*
-  extendSobj(){
-    if(this.state.ctx && this.state.ctx.type && this.state.sobj){
-
-      const sobj = this.state.sobj;
-      const ctx = this.state.ctx;
-
-      if(sobj && sobj.attributes){
-        const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
-
-        const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
-
-        this.setState({
-          refreshedDate: new Date(),
-          sobjExt: {
-            compactTitle: compactTitle,
-            compactSummary: compactSummary
-          }
-        });
-      }
-    }
-  },
-*/
-  getSobjExt(sobj,ctx){
-    if(ctx && sobj && sobj.Id){
-      if(sobj && ctx.compactLayout){
-        const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
-        const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
-        return {
-          compactTitle: compactTitle,
-          compactSummary: compactSummary
-        };
-      }
-    }
-    return;
-  },
-
-  updateSyncedSobj(sobj,ctx){
-    const sobjExt = this.getSobjExt(sobj,ctx);
+  updateContext(ctx){
     this.setState({
-      sobj:sobj?sobj:this.state.sobj,
-      sobjExt:sobjExt?sobjExt:this.state.sobjExt,
       ctx:ctx?ctx:this.state.ctx,
       compactLayout:ctx?ctx.compactLayout:this.state.compactLayout,
       defaultLayout:ctx?ctx.defaultLayout:this.state.defaultLayout,
       theme:ctx?ctx.theme:this.state.theme,
       describe:ctx?ctx.describe:this.state.describe,
       listViews:ctx?ctx.listViews:this.state.listViews,
-      loading:sobj?false:this.state.loading,
+      loading:ctx.listViews?false:this.state.loading,
       refreshedDate: new Date()
     });
   },
   updateMetaContext(ctx){
 //    updateSyncedSobj(null,ctx);
   },
-  handleDataLoad(){
-    if(this.props.onData){
-      this.props.onData({
-        sobj:this.state.sobj,
-        compactLayout:this.state.compactLayout
-      });
-    }
-  },
 
   getData(nocache) {
     this.setState({loading:true});
-    if(!this.props.type || !this.props.id){
+
+    if(!this.props.type){
       return;
     }
 
-
-    getMetadataByType({type:this.props.type})
+    getListViewsByType({type:this.props.type})
     .then((ctx)=>{
-      smartSyncStore.getByTypeAndId(this.props.type,this.props.id,nocache,(sobj)=>{
-        if(sobj){
-          this.updateSyncedSobj(sobj,ctx);
-        }
-      });
+      this.updateContext(ctx);
     });
 
   },
@@ -255,39 +146,11 @@ module.exports = React.createClass ({
       </this.props.wrapper>
     )
   },
-  componentWillReceiveProps(newProps){
-    if(this.props.refreshDate !== newProps.refreshDate){
-//      this.getInfo();
+
+  componentDidUpdate(newProps){
+    if(this.props.type !== newProps.type ){
       this.getData();
     }
   },
 
-  shouldComponentUpdate(nextProps, nextState){
-    if(!this.props.update){
-      return false;
-    }
-
-//    if(this.state.loading !== nextState.loading){
-//      return true;
-//    }
-
-    if(this.props.type !== nextProps.type){
-      return true;
-    }
-
-    if(this.state.refreshedDate !== nextState.refreshedDate){
-      return true;
-    }
-
-    if(this.state.sobj.LastModifiedDate === nextState.sobj.LastModifiedDate){
-      return false;
-    }
-
-    if(!shallowEqual(this.state.sobj, nextState.sobj)){
-      return true;
-    }
-
-    return false;
-
-  }
 });
