@@ -75,7 +75,7 @@ module.exports = React.createClass ({
           loading:false
         });
       }
-    });
+    },true);
 
 /*
     forceClient.relevantItems([this.props.type],

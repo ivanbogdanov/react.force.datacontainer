@@ -30,6 +30,7 @@ import RelevantItems from './RelevantItems';
 import ScrollRefresh from './ScrollRefresh';
 import RelatedList from './RelatedList';
 import NamedListView from './NamedListView';
+import SearchResultList from './SearchResultList';
 import ListViews from './ListViews';
 import {utils, updateRelevants} from 'react.force.data';
 
@@ -40,6 +41,7 @@ module.exports = {
   List: List,
   RelevantItems: RelevantItems,
   NamedListView:NamedListView,
+  SearchResultList: SearchResultList,
   ScrollRefresh: ScrollRefresh,
   RelatedList:RelatedList,
   ListViews:ListViews,

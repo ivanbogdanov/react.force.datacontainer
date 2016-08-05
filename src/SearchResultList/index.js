@@ -33,13 +33,22 @@ import React, {
 
 import {forceClient} from 'react.force';
 
-import {requestWithTypeAndId, relevantItemsWithType, allWithType, doNamedListViewQueryForType} from 'react.force.data';
+import {requestWithTypeAndId, relevantItemsWithType, allWithType, doNamedListViewQueryForType, searchByType, search} from 'react.force.data';
+
+const normalize = (foundItems) => {
+  let list = [];
+  Object.keys(foundItems).forEach(type=>{
+    list = list.concat(foundItems[type]);
+  });
+  return list;
+};
 
 module.exports = React.createClass ({
   getDefaultProps(){
     return {
       type:null,
-      name:'All',
+      query:'',
+      minLength:3,
       refreshDate:new Date(),
       style:{}
     };
@@ -67,25 +76,21 @@ module.exports = React.createClass ({
   },
   getData() {
     this.setState({loading:true});
-    if(this.props.name === 'relevantItems'){
-      relevantItemsWithType(this.props.type,(err, items)=>{
+    if(this.props.query && this.props.query.length && this.props.query.length>=this.props.minLength){
+      search(this.props.query,(err, items)=>{
         if(!err){
           this.setState({
-            dataSource: this.getDataSource(items),
+            dataSource: this.getDataSource(normalize(items)),
             loading:false
           });
         }
       });
     }
     else{
-      doNamedListViewQueryForType(this.props.type,this.props.name,(err, items)=>{
-        if(!err){
-          this.setState({
-            dataSource: this.getDataSource(items),
-            loading:false
-          });
-        }
-      }, true);
+      this.setState({
+        dataSource: this.getDataSource([]),
+        loading:false
+      });
     }
   },
 
@@ -102,7 +107,7 @@ module.exports = React.createClass ({
 //    }
   },
   componentDidUpdate(newProps){
-    if(this.props.type !== newProps.type || this.props.name !== newProps.name){
+    if(this.props.type !== newProps.type || this.props.query !== newProps.query){
       this.getData();
     }
   },
