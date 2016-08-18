@@ -85,7 +85,7 @@ module.exports = React.createClass ({
             loading:false
           });
         }
-      }, true);
+      }, false);
     }
   },
 

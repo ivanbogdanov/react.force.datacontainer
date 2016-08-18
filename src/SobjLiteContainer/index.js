@@ -40,10 +40,10 @@ import {
   utils,
   metaContext,
   getMetadataByType,
+  getThemeByType,
   requestWithTypeAndId,
   addSobjStoreListener,
-  requestSobjWithTypeAndId,
-  refreshWithTypeAndId
+  requestSobjWithTypeAndId
 } from 'react.force.data';
 
 const subscribers = [];
@@ -107,6 +107,10 @@ const notifyMetaContext = (ctx) => {
   }
 
 };
+
+const themeCache = {};
+
+
 
 //smartSyncStore.addListener(notifySync);
 addSobjStoreListener(sobjStoreListener);
@@ -172,6 +176,7 @@ module.exports = React.createClass ({
     subscribe(this);
     this.shortId = getShortId(this.props.id);
     this.normalizedId = utils.normalizeId(this.props.id);
+
 //    this.handleRefresh();
 //    requestWithTypeAndId(this.props.type, this.props.id);
 
@@ -182,8 +187,8 @@ module.exports = React.createClass ({
   },
   handleRefresh(){
 //    this.getData(true);
-    refreshWithTypeAndId(this.props.type, this.props.id, true);
-    //const sobj = getByTypeAndId(this.props.type, this.props.id);
+    //requestWithTypeAndId(this.props.type, this.props.id);
+    const sobj = getByTypeAndId(this.props.type, this.props.id);
 
     this.setState({loading:true});
   },
@@ -235,7 +240,7 @@ module.exports = React.createClass ({
       theme:ctx?ctx.theme:this.state.theme,
       describe:ctx?ctx.describe:this.state.describe,
       listViews:ctx?ctx.listViews:this.state.listViews,
-      loading:sobj||this.state.sobj&&ctx||this.state.ctx?false:true,
+      loading:sobj?false:this.state.loading,
       refreshedDate: new Date()
     });
   },
@@ -252,68 +257,46 @@ module.exports = React.createClass ({
   },
 
   getData(nocache) {
-
     this.setState({loading:true});
     if(!this.props.type || !this.props.id){
       return;
     }
 
-    requestSobjWithTypeAndId(this.props.type,this.props.id);
+    const sobj = getByTypeAndId(this.props.type, this.props.id);
+    const theme = getThemeByType(this.props.type);
 
-    getMetadataByType({type:this.props.type})
-    .then((ctx)=>{
-      this.updateSyncedSobj(null,ctx);
-
-/*
-      smartSyncStore.getByTypeAndId(this.props.type,this.props.id,nocache,(sobj)=>{
-        if(sobj){
-          this.updateSyncedSobj(sobj,ctx);
-        }
-      });
-*/
-    });
+    this.updateSyncedSobj(sobj);
 
   },
 
   render() {
-    const loading = (!this.state.sobj || !this.state.ctx);
     return (
       <this.props.wrapper style={this.props.style}>
-        { loading?<Text></Text>:this.props.children }
-        {/* this.props.children */}
+        {/*this.state.loading?null:this.props.children*/}
+        { this.props.children }
       </this.props.wrapper>
     )
   },
-/*
   componentWillReceiveProps(newProps){
-    if(this.props.refreshDate !== newProps.refreshDate){
-//      this.getInfo();
-      this.getData();
-    }
-  },
-*/
-  componentDidUpdate( prevProps, prevState ){
-    if(this.props.id !== prevProps.id ){
+    if(newProps.id !== this.props.id){
       this.normalizedId = utils.normalizeId(this.props.id);
-      this.getData();
     }
-    if(this.props.refreshDate !== prevProps.refreshDate){
+    if(this.props.refreshDate !== newProps.refreshDate){
 //      this.getInfo();
       this.getData();
     }
   },
 
   shouldComponentUpdate(nextProps, nextState){
-//    if(!this.props.update){
-//      return false;
-//    }
-
-
-    if(this.props.type !== nextProps.type){
-      return true;
+    if(!this.props.update){
+      return false;
     }
 
-    if(this.props.id !== nextProps.id){
+//    if(this.state.loading !== nextState.loading){
+//      return true;
+//    }
+
+    if(this.props.type !== nextProps.type){
       return true;
     }
 

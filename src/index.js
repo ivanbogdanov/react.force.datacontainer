@@ -25,6 +25,8 @@
  */
  
 import SobjContainer from './SobjContainer';
+import SobjLiteContainer from './SobjLiteContainer';
+
 import List from './List';
 import RelevantItems from './RelevantItems';
 import ScrollRefresh from './ScrollRefresh';
@@ -32,11 +34,12 @@ import RelatedList from './RelatedList';
 import NamedListView from './NamedListView';
 import SearchResultList from './SearchResultList';
 import ListViews from './ListViews';
-import {utils, updateRelevants} from 'react.force.data';
+import {utils, checkForUpdates} from 'react.force.data';
 
 module.exports = {
   SobjContainer: SobjContainer,
   Sobj: SobjContainer,
+  SobjLite: SobjLiteContainer,
   ListContainer: List,
   List: List,
   RelevantItems: RelevantItems,
@@ -46,5 +49,5 @@ module.exports = {
   RelatedList:RelatedList,
   ListViews:ListViews,
   utils: utils,
-  refreshCached: updateRelevants
+  refreshCached: checkForUpdates
 };
