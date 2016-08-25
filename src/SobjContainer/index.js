@@ -42,7 +42,9 @@ import {
   getMetadataByType,
   requestWithTypeAndId,
   addSobjStoreListener,
+  addContextListener,
   requestSobjWithTypeAndId,
+  requestMetadataByType,
   refreshWithTypeAndId
 } from 'react.force.data';
 
@@ -92,8 +94,11 @@ const sobjStoreListener = (sobjs) => {
   }
 };
 
+const contextListener = (ctx) => {
+  notifyMetaContext(ctx);
+};
+
 const notifyMetaContext = (ctx) => {
-  return;
   if(ctx && ctx.type){
     if(subscribers && subscribers.length){
       subscribers.forEach((subscriber)=>{
@@ -110,6 +115,7 @@ const notifyMetaContext = (ctx) => {
 
 //smartSyncStore.addListener(notifySync);
 addSobjStoreListener(sobjStoreListener);
+addContextListener(contextListener);
 
 module.exports = React.createClass ({
   shortId:null,
@@ -170,6 +176,7 @@ module.exports = React.createClass ({
   },
   componentDidMount(){
     subscribe(this);
+
     this.shortId = getShortId(this.props.id);
     this.normalizedId = utils.normalizeId(this.props.id);
 //    this.handleRefresh();
@@ -240,7 +247,7 @@ module.exports = React.createClass ({
     });
   },
   updateMetaContext(ctx){
-//    updateSyncedSobj(null,ctx);
+    this.updateSyncedSobj(null,ctx);
   },
   handleDataLoad(){
     if(this.props.onData){
@@ -260,9 +267,11 @@ module.exports = React.createClass ({
 
     requestSobjWithTypeAndId(this.props.type,this.props.id);
 
-    getMetadataByType({type:this.props.type})
-    .then((ctx)=>{
-      this.updateSyncedSobj(null,ctx);
+    requestMetadataByType(this.props.type);
+
+//    getMetadataByType({type:this.props.type})
+//    .then((ctx)=>{
+//      this.updateSyncedSobj(null,ctx);
 
 /*
       smartSyncStore.getByTypeAndId(this.props.type,this.props.id,nocache,(sobj)=>{
@@ -271,7 +280,7 @@ module.exports = React.createClass ({
         }
       });
 */
-    });
+//    });
 
   },
 
