@@ -45,19 +45,27 @@ module.exports = React.createClass ({
     };
   },
   childContextTypes: {
-    dataSource: React.PropTypes.object
+    dataSource: React.PropTypes.object,
+    doRefresh: React.PropTypes.func,
+    refreshedOn: React.PropTypes.number,
   },
   getInitialState(){
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     return {
       loading:false,
-      dataSource: ds.cloneWithRows([])
+      dataSource: ds.cloneWithRows([]),
+      refreshedOn: Date.now()
     };
   },
   getChildContext() {
     return {
-      dataSource: this.state.dataSource
+      dataSource: this.state.dataSource,
+      doRefresh: this.handleDoRefresh,
+      refreshedOn: this.state.refreshedOn
     };
+  },
+  handleDoRefresh(callback){
+    this.getData(true,callback);
   },
   componentDidMount(){
     this.getData();
@@ -65,27 +73,32 @@ module.exports = React.createClass ({
   getDataSource (items) {
     return this.state.dataSource.cloneWithRows(items);
   },
-  getData() {
+  getData(noCache, callback) {
     this.setState({loading:true});
     if(this.props.name === 'relevantItems'){
       relevantItemsWithType(this.props.type,(err, items)=>{
         if(!err){
           this.setState({
             dataSource: this.getDataSource(items),
-            loading:false
+            loading:false,
+            refreshedOn: Date.now()
           });
         }
-      });
+      }, noCache);
     }
     else{
+      console.log('BEFORE doNamedListViewQueryForType: '+noCache);
       doNamedListViewQueryForType(this.props.type,this.props.name,(err, items)=>{
         if(!err){
           this.setState({
             dataSource: this.getDataSource(items),
             loading:false
           });
+          if(callback){
+            callback();
+          }
         }
-      }, false);
+      }, noCache);
     }
   },
 
@@ -96,10 +109,21 @@ module.exports = React.createClass ({
       </View>
     )
   },
+  clearDataSource() {
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    this.setState(
+      {
+        dataSource: ds.cloneWithRows([])
+      }
+    );
+  },
   componentWillReceiveProps(newProps){
-//    if(this.props.refreshDate !== newProps.refreshDate){
-//      this.getData();
-//    }
+    if(this.props.type !== newProps.type){
+      return this.clearDataSource();
+    }
+    if(this.props.name !== newProps.name){
+      return this.clearDataSource();
+    }
   },
   componentDidUpdate(newProps){
     if(this.props.type !== newProps.type || this.props.name !== newProps.name){

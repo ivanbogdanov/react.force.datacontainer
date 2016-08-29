@@ -26,6 +26,7 @@
  
 import SobjContainer from './SobjContainer';
 import SobjLiteContainer from './SobjLiteContainer';
+import SobjListItemContainer from './SobjListItemContainer';
 
 import List from './List';
 import RelevantItems from './RelevantItems';
@@ -40,6 +41,7 @@ module.exports = {
   SobjContainer: SobjContainer,
   Sobj: SobjContainer,
   SobjLite: SobjLiteContainer,
+  SobjListItemContainer:SobjListItemContainer,
   ListContainer: List,
   List: List,
   RelevantItems: RelevantItems,

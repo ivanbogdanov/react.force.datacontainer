@@ -60,6 +60,13 @@ module.exports = React.createClass ({
       dataSource: ds.cloneWithRows([])
     };
   },
+  clearDataSource() {
+    this.setState(
+      {
+        dataSource: ds.cloneWithRows([])
+      }
+    );
+  },
   getChildContext() {
     return {
       dataSource: this.state.dataSource

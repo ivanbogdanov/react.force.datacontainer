@@ -61,13 +61,6 @@ const unsubscribe = (comp) => {
   }
 };
 
-const getShortId = (id) => {
-  if(id && id.length>15){
-    return id.substring(0,15);
-  }
-  return id;
-};
-
 const notifySync = (sobjs,ctx) => {
   if(subscribers && subscribers.length){
     subscribers.forEach((subscriber)=>{
@@ -113,8 +106,6 @@ const notifyMetaContext = (ctx) => {
 
 };
 
-//smartSyncStore.addListener(notifySync);
-addSobjStoreListener(sobjStoreListener);
 addContextListener(contextListener);
 
 module.exports = React.createClass ({
@@ -131,203 +122,71 @@ module.exports = React.createClass ({
     };
   },
   childContextTypes: {
-    sobj: React.PropTypes.object,
-    sobjExt: React.PropTypes.object,
     compactLayout: React.PropTypes.object,
     defaultLayout: React.PropTypes.object,
     theme: React.PropTypes.object,
     describe: React.PropTypes.object,
     listViews: React.PropTypes.object,
-    doRefresh: React.PropTypes.func,
-    refreshedDate: React.PropTypes.instanceOf(Date),
-    compactTitle: React.PropTypes.string,
-    compactSummary: React.PropTypes.array
   },
   getInitialState(){
     return {
-      sobj:this.props.sobj?this.props.sobj:{Name:' ',attributes:{}},
-      sobjExt:{compactTitle:'',compactSummary:[]},
-      ctx:{},
-      compactLayout:{},
-      defaultLayout:{},
       theme:{},
       describe:{},
-      listViews:{},
       loading:false,
-      refreshedDate: new Date(),
-      compactTitle:'',
-      compactSummary:[]
     };
   },
   getChildContext() {
     return {
-      sobj: this.state.sobj,
-      sobjExt: this.state.sobjExt,
-      compactLayout:this.state.compactLayout,
-      defaultLayout:this.state.defaultLayout,
       theme:this.state.theme,
       describe:this.state.describe,
-      listViews:this.state.listViews,
-      doRefresh:this.handleRefresh,
-      refreshedDate: this.state.refreshedDate,
-      compactTitle: this.state.compactTitle,
-      compactSummary: this.state.compactSummary
     };
   },
   componentDidMount(){
     subscribe(this);
-
-    this.shortId = getShortId(this.props.id);
-    this.normalizedId = utils.normalizeId(this.props.id);
-//    this.handleRefresh();
-//    requestWithTypeAndId(this.props.type, this.props.id);
-
     this.getData(false);
   },
   componentWillUnmount(){
     unsubscribe(this);
   },
-  handleRefresh(){
-//    this.getData(true);
-    refreshWithTypeAndId(this.props.type, this.props.id, true);
-    //const sobj = getByTypeAndId(this.props.type, this.props.id);
 
-    this.setState({loading:true});
-  },
-/*
-  extendSobj(){
-    if(this.state.ctx && this.state.ctx.type && this.state.sobj){
-
-      const sobj = this.state.sobj;
-      const ctx = this.state.ctx;
-
-      if(sobj && sobj.attributes){
-        const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
-
-        const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
-
-        this.setState({
-          refreshedDate: new Date(),
-          sobjExt: {
-            compactTitle: compactTitle,
-            compactSummary: compactSummary
-          }
-        });
-      }
-    }
-  },
-*/
-  getSobjExt(sobj,ctx){
-    if(ctx && sobj && sobj.Id){
-      if(sobj && ctx.compactLayout){
-        const compactTitle = utils.getCompactTitle(sobj, ctx.compactLayout._extra.titleFieldNames);
-        const compactSummary = utils.getCompactSummary(sobj, ctx.compactLayout._extra.titleFieldNames, ctx.compactLayout._extra.fieldNames);
-        return {
-          compactTitle: compactTitle,
-          compactSummary: compactSummary
-        };
-      }
-    }
-    return;
-  },
-
-  updateSyncedSobj(sobj,ctx){
-    const sobjExt = this.getSobjExt(sobj,ctx?ctx:this.state.ctx);
-    this.setState({
-      sobj:sobj?sobj:this.state.sobj,
-      sobjExt:sobjExt?sobjExt:this.state.sobjExt,
-      ctx:ctx?ctx:this.state.ctx,
-      compactLayout:ctx?ctx.compactLayout:this.state.compactLayout,
-      defaultLayout:ctx?ctx.defaultLayout:this.state.defaultLayout,
-      theme:ctx?ctx.theme:this.state.theme,
-      describe:ctx?ctx.describe:this.state.describe,
-      listViews:ctx?ctx.listViews:this.state.listViews,
-      loading:sobj||this.state.sobj&&ctx||this.state.ctx?false:true,
-      refreshedDate: new Date()
-    });
-  },
   updateMetaContext(ctx){
-    this.updateSyncedSobj(null,ctx);
-  },
-  handleDataLoad(){
-    if(this.props.onData){
-      this.props.onData({
-        sobj:this.state.sobj,
-        compactLayout:this.state.compactLayout
-      });
-    }
+    this.setState({
+      theme:ctx.theme,
+      describe:ctx.describe,
+      loading:false,
+    });
   },
 
   getData(nocache) {
-
     this.setState({loading:true});
-    if(!this.props.type || !this.props.id){
+    if(!this.props.type){
       return;
     }
-
-    requestSobjWithTypeAndId(this.props.type,this.props.id);
-
     requestMetadataByType(this.props.type);
-
-
   },
 
   render() {
-    const loading = (!this.state.sobj || !this.state.ctx);
     return (
       <this.props.wrapper style={this.props.style}>
-        { loading?<Text></Text>:this.props.children }
-        {/* this.props.children */}
+        { this.state.loading?<Text>LOADING</Text>:this.props.children }
       </this.props.wrapper>
     )
   },
-/*
-  componentWillReceiveProps(newProps){
-    if(this.props.refreshDate !== newProps.refreshDate){
-//      this.getInfo();
-      this.getData();
-    }
-  },
-*/
+
   componentDidUpdate( prevProps, prevState ){
-    if(this.props.id !== prevProps.id ){
-      this.normalizedId = utils.normalizeId(this.props.id);
-      this.getData();
-    }
     if(this.props.refreshDate !== prevProps.refreshDate){
-//      this.getInfo();
       this.getData();
     }
   },
 
   shouldComponentUpdate(nextProps, nextState){
-//    if(!this.props.update){
-//      return false;
-//    }
-
-
     if(this.props.type !== nextProps.type){
       return true;
     }
-
-    if(this.props.id !== nextProps.id){
+    if(this.state.loading !== nextState.loading){
       return true;
     }
-
-    if(this.state.refreshedDate !== nextState.refreshedDate){
-      return true;
-    }
-
-    if(this.state.sobj.LastModifiedDate === nextState.sobj.LastModifiedDate){
-      return false;
-    }
-
-    if(!shallowEqual(this.state.sobj, nextState.sobj)){
-      return true;
-    }
-
     return false;
-//    return true;
-
   }
+
 });
