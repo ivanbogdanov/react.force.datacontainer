@@ -46,6 +46,7 @@ module.exports = React.createClass ({
   },
   childContextTypes: {
     dataSource: React.PropTypes.object,
+    listRefreshing: React.PropTypes.bool,
     doRefresh: React.PropTypes.func,
     refreshedOn: React.PropTypes.number,
   },
@@ -61,7 +62,8 @@ module.exports = React.createClass ({
     return {
       dataSource: this.state.dataSource,
       doRefresh: this.handleDoRefresh,
-      refreshedOn: this.state.refreshedOn
+      refreshedOn: this.state.refreshedOn,
+      listRefreshing: this.state.loading
     };
   },
   handleDoRefresh(callback){
@@ -87,7 +89,6 @@ module.exports = React.createClass ({
       }, noCache);
     }
     else{
-      console.log('BEFORE doNamedListViewQueryForType: '+noCache);
       doNamedListViewQueryForType(this.props.type,this.props.name,(err, items)=>{
         if(!err){
           this.setState({
@@ -113,7 +114,8 @@ module.exports = React.createClass ({
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.setState(
       {
-        dataSource: ds.cloneWithRows([])
+        dataSource: ds.cloneWithRows([]),
+        loading:true
       }
     );
   },
